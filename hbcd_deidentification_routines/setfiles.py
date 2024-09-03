@@ -52,7 +52,7 @@ def replace_text_in_set_file(input_path_to_set_file, output_path_to_set_file, DC
     parent_folder = os.path.dirname(output_path_to_set_file)
     if not os.path.exists(parent_folder):
         os.makedirs(parent_folder)
-    scipy.io.savemat(output_path_to_set_file, set_data)
+    scipy.io.savemat(output_path_to_set_file, set_data, appendmat = False)
     print(f"Processed {input_path_to_set_file} and saved to {output_path_to_set_file}")
 
 # Call the fucntion
