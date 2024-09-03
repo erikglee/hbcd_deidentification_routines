@@ -21,33 +21,68 @@ def my_parser():
     return parser.parse_args()
 
 
+def replace_in_strings(data, old_pattern, new_pattern):
+    """
+    Recursively traverses a data structure to find strings and replace a pattern with a new one.
+    
+    Parameters:
+    - data: The data structure to traverse (can be dict, list, tuple, np.array, or any object).
+    - old_pattern: The pattern to search for in strings.
+    - new_pattern: The pattern to replace with in strings.
+    
+    Returns:
+    - The modified data structure with the pattern replaced in strings.
+    """
+    # If the data is a dictionary, recursively apply the function to each value
+    if isinstance(data, dict):
+        for key, value in data.items():
+            data[key] = replace_in_strings(value, old_pattern, new_pattern)
+
+    # If the data is a list or tuple, recursively apply the function to each element
+    elif isinstance(data, list):
+        for i in range(len(data)):
+            data[i] = replace_in_strings(data[i], old_pattern, new_pattern)
+    elif isinstance(data, tuple):
+        data = tuple(replace_in_strings(list(data), old_pattern, new_pattern))
+
+    # If the data is a NumPy array, handle both structured and unstructured arrays
+    elif isinstance(data, np.ndarray):
+        for i in range(len(data)):
+            data[i] = replace_in_strings(data[i], old_pattern, new_pattern)
+
+    # If the data is a numpy.void object (e.g., a record in a structured array), handle its fields
+    elif isinstance(data, np.void):
+        for field_name in data.dtype.names:
+            data[field_name] = replace_in_strings(data[field_name], old_pattern, new_pattern)
+
+    # If the data is a string, replace the old pattern with the new one
+    elif isinstance(data, str):
+        return data.replace(old_pattern, new_pattern)
+
+    # If the data is a bytes object, replace the old pattern with the new one
+    elif isinstance(data, bytes):
+        return data.replace(old_pattern.encode(), new_pattern.encode())
+
+    # If the data is a NumPy string, replace the old pattern with the new one
+    elif isinstance(data, np.str_):
+        return np.str_(data.replace(old_pattern, new_pattern))
+
+    # If the data is a NumPy bytes string, replace the old pattern with the new one
+    elif isinstance(data, np.bytes_):
+        return np.bytes_(data.replace(old_pattern.encode(), new_pattern.encode()))
+
+    # For any other data types, return the data as is
+    #print(type(data))
+    return data
+
+
 
 def replace_text_in_set_file(input_path_to_set_file, output_path_to_set_file, DCCID, PSCID, GUID):
     """Load a .set file, replace text, and save the modified file."""
     set_data = scipy.io.loadmat(input_path_to_set_file)
-    #print(set_data)
-    # print(set_data.keys())
-
-    try:
-        if "ecg_eeg" in input_path_to_set_file.split('/')[-1]:
-            #print(set_data['setname'][0])
-            set_data['setname'][0] = set_data['setname'][0].replace(PSCID,GUID)
-            print(set_data['setname'][0])
-         
-        elif "eeg_eeg" in input_path_to_set_file.split('/')[-1]:
-            temp = set_data['EEG'][0][0][0]
-            temp[0] = GUID
-            temp = temp[0].astype(str)
-            temp_1 = set_data['EEG'][0][0][1]
-            temp_1[0] = GUID
-            temp_1 = temp_1[0].astype(str)
-            set_data['EEG'][0][0][0] = temp.replace(DCCID, GUID).rstrip()
-            set_data['EEG'][0][0][1] = temp_1.replace(DCCID, GUID).rstrip()
-            print(set_data['EEG'][0][0][0])
-            print(set_data['EEG'][0][0][1])
-       
-    except KeyError:
-        print("Tags  'EEG' and 'setname' not found in the dictionary. Please check the key name.")
+    set_data = replace_in_strings(set_data, 'sub-{}'.format(DCCID), 'sub-{}'.format(GUID))
+    set_data = replace_in_strings(set_data, '{}_{}'.format(PSCID, DCCID), GUID)
+    set_data = replace_in_strings(set_data, PSCID, GUID)
 
     parent_folder = os.path.dirname(output_path_to_set_file)
     if not os.path.exists(parent_folder):
