@@ -97,7 +97,7 @@ def replace_text_in_set_file(input_path_to_set_file, output_path_to_set_file, DC
     print(f"Processed {input_path_to_set_file} and saved to {output_path_to_set_file}")
 
 def main():
-    args = my_parser()
+    args = my_parser().parse_args()
     replace_text_in_set_file(args.directory_path, args.DCCID, args.PSCID, args.GUID)
 
 
