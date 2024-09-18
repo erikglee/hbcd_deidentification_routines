@@ -108,21 +108,32 @@ if __name__ == "__main__":
     args = my_parser()
     
 
+def move_set_copy_fdt_files(directory_path,output_path):
+    for root, dirs, files in os.walk(directory_path):
+        for file in files:
+            input_path_to_set_file = os.path.join(root, file)
+            # Compute the relative path to preserve the directory structure
+            relative_path = os.path.relpath(root,directory_path)
+            output_path_to_set_file = os.path.join(output_path, relative_path)
+            
+            if file.endswith('.set'):
+                # Call the function and pass the variables parsed by argparse
+                replace_text_in_set_file(input_path_to_set_file, output_path_to_set_file, args.DCCID, args.PSCID, args.GUID)
+                # Move the file to the destination folder
+                shutil.move(input_path_to_set_file, output_path_to_set_file)
+                print(f"set Moved: {input_path_to_set_file} -> {output_path_to_set_file}")
+                
+            elif file.endswith('.fdt'):
+                shutil.copy2(input_path_to_set_file, output_path_to_set_file)
+                print(f"fdt copied: {input_path_to_set_file} -> {output_path_to_set_file}")
     
-    directory_path = '/home/faird/shared/projects/HBCD_MIDB_IG/example_data/eeg_test_for_monalisa/bids_before_deidentification/sub-349836/ses-V03/eeg/'
-    output_path ='/home/faird/shared/projects/HBCD_MIDB_IG/example_data/eeg_test_for_monalisa/output_after_deidentification/'
     
-    # List of files ending with .sat
-    set_files = [f for f in os.listdir(directory_path) if f.endswith('.set')]
+directory_path = '/home/faird/shared/projects/HBCD_MIDB_IG/example_data/eeg_test_for_monalisa/bids_before_deidentification/sub-349836/ses-V03/eeg/'
+output_path ='/home/faird/shared/projects/HBCD_MIDB_IG/example_data/eeg_test_for_monalisa/output_after_deidentification/'
+    
+ 
+move_set_copy_fdt_files(directory_path, output_path)
 
-    for file in set_files:
-        input_path_to_set_file = os.path.join(directory_path, file)
-        output_path_to_set_file = os.path.join(directory_path, f"deidentified_{file}")
-        
-        
-        # Call the function and pass the variables parsed by argparse
-        replace_text_in_set_file(input_path_to_set_file, output_path_to_set_file, args.DCCID, args.PSCID, args.GUID)
-        shutil.move(output_path_to_set_file,output_path)
          
         
 
