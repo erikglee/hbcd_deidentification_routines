@@ -78,17 +78,30 @@ def replace_in_strings(data, old_pattern, new_pattern):
 
 
 def replace_text_in_set_file(input_path_to_set_file, output_path_to_set_file, DCCID, PSCID, GUID):
-    """Load a .set file, replace text, and save the modified file."""
-    set_data = scipy.io.loadmat(input_path_to_set_file)
-    set_data = replace_in_strings(set_data, 'sub-{}'.format(DCCID), 'sub-{}'.format(GUID))
-    set_data = replace_in_strings(set_data, '{}_{}'.format(PSCID, DCCID), GUID)
-    set_data = replace_in_strings(set_data, PSCID, GUID)
-
-    parent_folder = os.path.dirname(output_path_to_set_file)
-    if not os.path.exists(parent_folder):
-        os.makedirs(parent_folder)
-    scipy.io.savemat(output_path_to_set_file, set_data, appendmat = False)
-    print(f"Processed {input_path_to_set_file} and saved to {output_path_to_set_file}")
+    # gather all files
+    allset = glob.glob(os.path.join(input_path_to_set_file, '*.set'), recursive=True)
+    #print("Files to move", allfiles)
+     # iterate on all files to move them to destination folder
+    for file in allset:
+        dst_path = os.path.join(output_path_to_set_file, os.path.basename(file))
+        set_data = scipy.io.loadmat(file)
+                
+        """Load a .set file, replace text, and save the modified file."""
+        set_data = replace_in_strings(set_data, 'sub-{}'.format(DCCID), 'sub-{}'.format(GUID))
+        set_data = replace_in_strings(set_data, '{}_{}'.format(PSCID, DCCID), GUID)
+        set_data = replace_in_strings(set_data, PSCID, GUID)
+        parent_folder = os.path.dirname(output_path_to_set_file)
+        if not os.path.exists(parent_folder):
+            os.makedirs(parent_folder)
+        #scipy.io.savemat(output_path_to_set_file, set_data, appendmat = False)
+        #print(f"Processed {input_path_to_set_file} and saved to {output_path_to_set_file}")
+        shutil.copy(file, dst_path)
+        print(f"Processed {input_path_to_set_file} and saved to {output_path_to_set_file}")
+        
+    allfdt  = glob.glob(os.path.join(input_path_to_set_file, '*.fdt'), recursive=True)
+    for file in allfdt:
+        dst_path = os.path.join(output_path_to_set_file, os.path.basename(file))
+        shutil.copy(file, dst_path)ile}")
     
   
 def my_parser():
@@ -106,33 +119,9 @@ def my_parser():
 # Call the fucntion
 if __name__ == "__main__":
     args = my_parser()
+    replace_text_in_set_file(args.input_path_to_set_file, args.output_path_to_set_file, args.DCCID, args.PSCID, args.GUID)
     
 
-def move_set_copy_fdt_files(directory_path,output_path):
-    for root, dirs, files in os.walk(directory_path):
-        for file in files:
-            input_path_to_set_file = os.path.join(root, file)
-            # Compute the relative path to preserve the directory structure
-            relative_path = os.path.relpath(root,directory_path)
-            output_path_to_set_file = os.path.join(output_path, relative_path)
-            
-            if file.endswith('.set'):
-                # Call the function and pass the variables parsed by argparse
-                replace_text_in_set_file(input_path_to_set_file, output_path_to_set_file, args.DCCID, args.PSCID, args.GUID)
-                # Move the file to the destination folder
-                shutil.move(input_path_to_set_file, output_path_to_set_file)
-                print(f"set Moved: {input_path_to_set_file} -> {output_path_to_set_file}")
-                
-            elif file.endswith('.fdt'):
-                shutil.copy2(input_path_to_set_file, output_path_to_set_file)
-                print(f"fdt copied: {input_path_to_set_file} -> {output_path_to_set_file}")
-    
-    
-directory_path = '/home/faird/shared/projects/HBCD_MIDB_IG/example_data/eeg_test_for_monalisa/bids_before_deidentification/sub-349836/ses-V03/eeg/'
-output_path ='/home/faird/shared/projects/HBCD_MIDB_IG/example_data/eeg_test_for_monalisa/output_after_deidentification/'
-    
- 
-move_set_copy_fdt_files(directory_path, output_path)
 
          
         
