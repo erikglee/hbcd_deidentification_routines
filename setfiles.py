@@ -78,30 +78,17 @@ def replace_in_strings(data, old_pattern, new_pattern):
 
 
 def replace_text_in_set_file(input_path_to_set_file, output_path_to_set_file, DCCID, PSCID, GUID):
-    # gather all files
-    allset = glob.glob(os.path.join(input_path_to_set_file, '*.set'), recursive=True)
-    #print("Files to move", allfiles)
-     # iterate on all files to move them to destination folder
-    for file in allset:
-        dst_path = os.path.join(output_path_to_set_file, os.path.basename(file))
-        set_data = scipy.io.loadmat(file)
-                
-        """Load a .set file, replace text, and save the modified file."""
-        set_data = replace_in_strings(set_data, 'sub-{}'.format(DCCID), 'sub-{}'.format(GUID))
-        set_data = replace_in_strings(set_data, '{}_{}'.format(PSCID, DCCID), GUID)
-        set_data = replace_in_strings(set_data, PSCID, GUID)
-        parent_folder = os.path.dirname(output_path_to_set_file)
-        if not os.path.exists(parent_folder):
-            os.makedirs(parent_folder)
-        #scipy.io.savemat(output_path_to_set_file, set_data, appendmat = False)
-        #print(f"Processed {input_path_to_set_file} and saved to {output_path_to_set_file}")
-        shutil.copy(file, dst_path)
-        print(f"Processed {input_path_to_set_file} and saved to {output_path_to_set_file}")
-        
-    allfdt  = glob.glob(os.path.join(input_path_to_set_file, '*.fdt'), recursive=True)
-    for file in allfdt:
-        dst_path = os.path.join(output_path_to_set_file, os.path.basename(file))
-        shutil.copy(file, dst_path)ile}")
+    """Load a .set file, replace text, and save the modified file."""
+    set_data = scipy.io.loadmat(input_path_to_set_file)
+    set_data = replace_in_strings(set_data, 'sub-{}'.format(DCCID), 'sub-{}'.format(GUID))
+    set_data = replace_in_strings(set_data, '{}_{}'.format(PSCID, DCCID), GUID)
+    set_data = replace_in_strings(set_data, PSCID, GUID)
+
+    parent_folder = os.path.dirname(output_path_to_set_file)
+    if not os.path.exists(parent_folder):
+        os.makedirs(parent_folder)
+    scipy.io.savemat(output_path_to_set_file, set_data, appendmat = False)
+    
     
   
 def my_parser():
@@ -119,11 +106,40 @@ def my_parser():
 # Call the fucntion
 if __name__ == "__main__":
     args = my_parser()
-    replace_text_in_set_file(args.input_path_to_set_file, args.output_path_to_set_file, args.DCCID, args.PSCID, args.GUID)
     
 
+    
+    directory_path = '/home/faird/shared/projects/HBCD_MIDB_IG/example_data/eeg_test_for_monalisa/bids_before_deidentification/sub-349836/ses-V03/eeg/'
+    output_path ='/home/faird/shared/projects/HBCD_MIDB_IG/example_data/eeg_test_for_monalisa/output_after_deidentification/'
+   
+    # Split the path by "/" and filter out empty strings
+    path_parts = [part for part in directory_path.split("/") if part]
 
-         
+    # Get the last three elements
+    last_three = path_parts[-3:]
+
+    # Join the last three elements to form the new directory path
+    new_dir = os.path.join(output_path, *last_three)
+
+    # Create the new directory recursively
+    os.makedirs(new_dir, exist_ok=True)
+    
+    
+    # List of files ending with .sat
+    set_files = [f for f in os.listdir(directory_path) if f.endswith('.set')]
+    fdt_files = [f for f in os.listdir(directory_path) if f.endswith('.fdt')]
+
+    for file in set_files:
+        input_path_to_set_file = os.path.join(directory_path, file)
+        output_path_to_set_file = os.path.join(directory_path, file)
+        # Call the function and pass the variables parsed by argparse
+        replace_text_in_set_file(input_path_to_set_file, output_path_to_set_file, args.DCCID, args.PSCID, args.GUID)
+        shutil.copy(output_path_to_set_file,new_dir)
+        print(f"Processed {input_path_to_set_file} and saved to {new_dir}")
         
-
-
+    for file in fdt_files:
+        input_path_to_set_file = os.path.join(directory_path, file)
+        output_path_to_set_file = os.path.join(directory_path, file)
+        shutil.copy(output_path_to_set_file,new_dir)
+        print(f"Processed {input_path_to_set_file} and saved to {new_dir}")
+        
