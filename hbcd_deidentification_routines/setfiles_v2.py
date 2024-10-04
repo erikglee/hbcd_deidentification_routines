@@ -33,6 +33,9 @@ def replace_in_strings(data, old_pattern, new_pattern):
     Returns:
     - The modified data structure with the pattern replaced in strings.
     """
+
+    minimum_pattern_length = len(old_pattern)
+
     # If the data is a dictionary, recursively apply the function to each value
     if isinstance(data, dict):
         for key, value in data.items():
@@ -48,11 +51,15 @@ def replace_in_strings(data, old_pattern, new_pattern):
     # If the data is a NumPy array, handle both structured and unstructured arrays
     elif isinstance(data, np.ndarray):
         if data.dtype.str.startswith('<U'):
-            print('Changing numpy array with {} to <U100'.format(data.dtype.str))
-            new_ndarray = np.empty(data.shape, dtype='<U100')
-            for i in range(len(data)):
-                new_ndarray[i] = replace_in_strings(data[i], old_pattern, new_pattern)
-            return new_ndarray
+            if int(data.dtype.str.split('U')[1]) < minimum_pattern_length:
+                for i in range(len(data)):
+                    data[i] = replace_in_strings(data[i], old_pattern, new_pattern)
+            else:
+                print('Changing numpy array with {} to <U100'.format(data.dtype.str))
+                new_ndarray = np.empty(data.shape, dtype='<U100')
+                for i in range(len(data)):
+                    new_ndarray[i] = replace_in_strings(data[i], old_pattern, new_pattern)
+                return new_ndarray
         else:
             for i in range(len(data)):
                 data[i] = replace_in_strings(data[i], old_pattern, new_pattern)
