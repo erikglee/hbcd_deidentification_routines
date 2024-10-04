@@ -63,18 +63,22 @@ def replace_in_strings(data, old_pattern, new_pattern):
 
     # If the data is a string, replace the old pattern with the new one
     elif isinstance(data, str):
+        print('Potentially String.')
         return data.replace(old_pattern, new_pattern)
 
     # If the data is a bytes object, replace the old pattern with the new one
     elif isinstance(data, bytes):
+        print('Potentially changing bytes string.')
         return data.replace(old_pattern.encode(), new_pattern.encode())
 
     # If the data is a NumPy string, replace the old pattern with the new one
     elif isinstance(data, np.str_):
+        print('Potentially changing numpy string.')
         return np.str_(data.replace(old_pattern, new_pattern), dtype='<U100')
 
     # If the data is a NumPy bytes string, replace the old pattern with the new one
     elif isinstance(data, np.bytes_):
+        print('Potentially changing encoded bytes string.')
         return np.bytes_(data.replace(old_pattern.encode(), new_pattern.encode()))
 
     # For any other data types, return the data as is
