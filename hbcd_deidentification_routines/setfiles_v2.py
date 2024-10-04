@@ -48,6 +48,7 @@ def replace_in_strings(data, old_pattern, new_pattern):
     # If the data is a NumPy array, handle both structured and unstructured arrays
     elif isinstance(data, np.ndarray):
         if data.dtype.str.startswith('<U'):
+            print('Changing numpy array with {} to <U100'.format(data.dtype.str))
             new_ndarray = np.empty(data.shape, dtype='<U100')
             for i in range(len(data)):
                 new_ndarray[i] = replace_in_strings(data[i], old_pattern, new_pattern)
