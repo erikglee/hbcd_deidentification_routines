@@ -67,7 +67,7 @@ def replace_in_strings(data, old_pattern, new_pattern):
                         change_ever_needed = True
                 return change_ever_needed, data
             else:
-                print('Changing numpy array with {} to <U100'.format(data.dtype.str))
+                print('Changing numpy array with shape {} and dtype {} to <U100'.format(data.shape, data.dtype.str))
                 new_ndarray = np.empty(data.shape, dtype='<U100')
                 change_ever_needed = False
                 for i in range(len(data)):
