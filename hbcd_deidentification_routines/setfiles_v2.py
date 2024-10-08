@@ -32,6 +32,7 @@ def replace_in_strings(data, old_pattern, new_pattern):
     
     Returns:
     - The modified data structure with the pattern replaced in strings.
+    - A boolean indicating whether the data structure was modified.
     """
 
     minimum_pattern_length = len(old_pattern)
@@ -115,7 +116,7 @@ def replace_in_strings(data, old_pattern, new_pattern):
 
     # For any other data types, return the data as is
     #print(type(data))
-    return data
+    return False, data
 
 
 
