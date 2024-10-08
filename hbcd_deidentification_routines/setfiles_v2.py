@@ -59,24 +59,43 @@ def replace_in_strings(data, old_pattern, new_pattern):
     elif isinstance(data, np.ndarray):
         if data.dtype.str.startswith('<U'):
             if int(data.dtype.str.split('U')[1]) < minimum_pattern_length:
+                change_ever_needed = False
                 for i in range(len(data)):
                     change_needed, new_string = replace_in_strings(data[i], old_pattern, new_pattern)
                     if change_needed:
                         data[i] = new_string
+                        change_ever_needed = True
+                return change_ever_needed, data
             else:
                 print('Changing numpy array with {} to <U100'.format(data.dtype.str))
                 new_ndarray = np.empty(data.shape, dtype='<U100')
+                change_ever_needed = False
                 for i in range(len(data)):
-                    new_ndarray[i] = replace_in_strings(data[i], old_pattern, new_pattern)
-                return new_ndarray
+                    change_needed, new_string = replace_in_strings(data[i], old_pattern, new_pattern)
+                    if change_needed:
+                        new_ndarray[i] = new_string
+                        change_ever_needed = True
+                if change_ever_needed:
+                    data = new_ndarray
+                return change_ever_needed, data
         else:
+            change_ever_needed = False
             for i in range(len(data)):
-                data[i] = replace_in_strings(data[i], old_pattern, new_pattern)
+                change_needed, new_string = replace_in_strings(data[i], old_pattern, new_pattern)
+                if change_needed:
+                    data[i] = new_string
+                    change_ever_needed = True
+            return change_ever_needed, data
 
     # If the data is a numpy.void object (e.g., a record in a structured array), handle its fields
     elif isinstance(data, np.void):
+        change_ever_needed = False
         for field_name in data.dtype.names:
-            data[field_name] = replace_in_strings(data[field_name], old_pattern, new_pattern)
+            change_needed, new_string = replace_in_strings(data[field_name], old_pattern, new_pattern)
+            if change_needed:
+                data[field_name] = new_string
+                change_ever_needed = True
+        return change_ever_needed, data
 
     # If the data is a string, replace the old pattern with the new one
     elif isinstance(data, str):
