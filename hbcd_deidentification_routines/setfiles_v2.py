@@ -68,14 +68,18 @@ def replace_in_strings(data, old_pattern, new_pattern):
                 return change_ever_needed, data
             else:
                 print('Changing numpy array with shape {} and dtype {} to <U100'.format(data.shape, data.dtype.str))
-                new_ndarray = np.empty(data.shape, dtype='<U100')
+                new_ndarray = np.empty(data.shape, dtype='<U300')
                 change_ever_needed = False
+                maximum_observed_length = 0
                 for i in range(len(data)):
                     change_needed, new_string = replace_in_strings(data[i], old_pattern, new_pattern)
+                    if len(new_string) > maximum_observed_length:
+                        maximum_observed_length = len(new_string)
                     if change_needed:
                         new_ndarray[i] = new_string
                         change_ever_needed = True
                 if change_ever_needed:
+                    new_ndarray = new_ndarray.astype('<U{}'.format(maximum_observed_length))
                     data = new_ndarray
                 return change_ever_needed, data
         else:
