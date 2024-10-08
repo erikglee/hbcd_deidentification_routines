@@ -122,9 +122,9 @@ def replace_in_strings(data, old_pattern, new_pattern):
 def replace_text_in_set_file(input_path_to_set_file, output_path_to_set_file, DCCID, PSCID, GUID):
     """Load a .set file, replace text, and save the modified file."""
     set_data = scipy.io.loadmat(input_path_to_set_file)
-    set_data = replace_in_strings(set_data, 'sub-{}'.format(DCCID), 'sub-{}'.format(GUID))
-    set_data = replace_in_strings(set_data, '{}_{}'.format(PSCID, DCCID), GUID)
-    set_data = replace_in_strings(set_data, PSCID, GUID)
+    _, set_data = replace_in_strings(set_data, 'sub-{}'.format(DCCID), 'sub-{}'.format(GUID))
+    _, set_data = replace_in_strings(set_data, '{}_{}'.format(PSCID, DCCID), GUID)
+    _, set_data = replace_in_strings(set_data, PSCID, GUID)
 
     parent_folder = os.path.dirname(output_path_to_set_file)
     if not os.path.exists(parent_folder):
