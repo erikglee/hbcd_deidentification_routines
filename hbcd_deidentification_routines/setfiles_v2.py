@@ -81,6 +81,7 @@ def replace_in_strings(data, old_pattern, new_pattern):
                 if change_ever_needed:
                     new_ndarray = new_ndarray.astype('<U{}'.format(maximum_observed_length))
                     data = new_ndarray
+                    print('   final type: {}'.format(data.dtype.str))
                 return change_ever_needed, data
         else:
             change_ever_needed = False
