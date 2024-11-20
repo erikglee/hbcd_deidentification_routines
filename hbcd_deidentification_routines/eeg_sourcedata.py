@@ -1,3 +1,21 @@
+#!/usr/bin/env python
+import os
+import argparse    
+
+
+#These routines were originally written by Monalisa Bilas with edits from Erik Lee (9/3/2024)
+
+#The replace_text_in_set_file is function that can be used on it's own, or this whole script
+#can be run from the command line using the arguments denoted in my_parser
+
+def my_parser():
+
+    parser = argparse.ArgumentParser(description="Replace text in .set files.")
+    parser.add_argument("input_path_to_eventlogs_file", help="Path to the eventlogs.txt file with identifiable meta-data.")
+    parser.add_argument("output_path_to_eventlogs_file", help="Path to the eventlogs.txt file that you want to be created with de-identified meta-data.")
+    parser.add_argument("GUID", help="The de-identified identifier to replace the DCCID and PSCID.")
+    return parser.parse_args()
+
 def deidentify_sourcedata_eventlogs_file(input_file_path, output_file_path, guid):
     '''De-identifies eeg sourcedata eventlogs.txt files
     
@@ -27,6 +45,10 @@ def deidentify_sourcedata_eventlogs_file(input_file_path, output_file_path, guid
     if subject_component.startswith('sub-')*session_component.startswith('ses-') == False:
         raise ValueError('Error: expected file with naming structure like sub-<label>_ses-<label>_task-<label>_acq-eeg_eventlogs.txt')
         
+    directory = os.path.dirname(output_file_path)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+        
     sub_partial = subject_component.split('-')[1]
     ses_partial = session_component.split('-')[1]
     old_text = '{}_{}'.format(sub_partial, ses_partial)
@@ -39,3 +61,13 @@ def deidentify_sourcedata_eventlogs_file(input_file_path, output_file_path, guid
             f.write(templine.replace(old_text, new_text))
             
     return
+
+
+def main():
+    args = my_parser()
+    deidentify_sourcedata_eventlogs_file(args.input_path_to_eventlogs_file, args.output_path_to_eventlogs_file, args.GUID)
+
+
+# Call the fucntion
+if __name__ == "__main__":
+    main()
