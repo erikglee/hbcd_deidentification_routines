@@ -3,11 +3,6 @@ import os
 import argparse    
 
 
-#These routines were originally written by Monalisa Bilas with edits from Erik Lee (9/3/2024)
-
-#The replace_text_in_set_file is function that can be used on it's own, or this whole script
-#can be run from the command line using the arguments denoted in my_parser
-
 def my_parser():
 
     parser = argparse.ArgumentParser(description="Replace text in .set files.")
