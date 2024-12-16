@@ -29,7 +29,7 @@ def deid_mrs_nifti(input_file_name, output_file_name):
 
     fields_to_remove = ['InstitutionName', 'InstitutionAddress', 'PatientSex', 'PatientWeight']
     for temp_field in fields_to_remove:
-        if os.path.exists(output_nifti) == False:
+        if os.path.exists(output_file_name) == False:
             sys.argv = ["spec2nii", "anon", input_file_name, '-f', output_file_name.replace('.nii.gz', ''), '-r', temp_field]
         else:
             sys.argv = ["spec2nii", "anon", output_file_name, '-f', output_file_name.replace('.nii.gz', ''), '-r', temp_field]
