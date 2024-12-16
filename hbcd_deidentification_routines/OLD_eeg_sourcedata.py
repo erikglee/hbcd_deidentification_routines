@@ -26,6 +26,8 @@ def deidentify_sourcedata_eventlogs_file(input_file_path, output_file_path, guid
         file.
     
     '''
+
+    raise NameError('Dont use this script because it only partially removes IDs....')
     
     if input_file_path.endswith('eventlogs.txt') == False:
         raise ValueError('Error: expected file with naming structure like sub-<label>_ses-<label>_task-<label>_acq-eeg_eventlogs.txt')
