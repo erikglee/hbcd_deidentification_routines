@@ -42,6 +42,7 @@ def replace_in_strings(data, old_pattern, new_pattern):
         for key, value in data.items():
             change_needed, new_string = replace_in_strings(value, old_pattern, new_pattern)
             if change_needed:
+                print('   Pattern found: {}'.format(old_pattern))
                 data[key] = new_string
 
     # If the data is a list or tuple, recursively apply the function to each element
@@ -49,10 +50,12 @@ def replace_in_strings(data, old_pattern, new_pattern):
         for i in range(len(data)):
             change_needed, new_string = replace_in_strings(data[i], old_pattern, new_pattern)
             if change_needed:
+                print('   Pattern found: {}'.format(old_pattern))
                 data[i] = new_string
     elif isinstance(data, tuple):
         change_needed, new_string = replace_in_strings(list(data), old_pattern, new_pattern)
         if change_needed:
+            print('   Pattern found: {}'.format(old_pattern))
             data = tuple(new_string)
 
     # If the data is a NumPy array, handle both structured and unstructured arrays
@@ -63,6 +66,7 @@ def replace_in_strings(data, old_pattern, new_pattern):
                 for i in range(len(data)):
                     change_needed, new_string = replace_in_strings(data[i], old_pattern, new_pattern)
                     if change_needed:
+                        print('   Pattern found: {}'.format(old_pattern))
                         data[i] = new_string
                         change_ever_needed = True
                 return change_ever_needed, data
@@ -76,6 +80,7 @@ def replace_in_strings(data, old_pattern, new_pattern):
                     if len(new_string) > maximum_observed_length:
                         maximum_observed_length = len(new_string)
                     if change_needed:
+                        print('   Pattern found: {}'.format(old_pattern))
                         new_ndarray[i] = new_string
                         change_ever_needed = True
                 if change_ever_needed:
@@ -88,6 +93,7 @@ def replace_in_strings(data, old_pattern, new_pattern):
             for i in range(len(data)):
                 change_needed, new_string = replace_in_strings(data[i], old_pattern, new_pattern)
                 if change_needed:
+                    print('   Pattern found: {}'.format(old_pattern))
                     data[i] = new_string
                     change_ever_needed = True
             return change_ever_needed, data
@@ -98,6 +104,7 @@ def replace_in_strings(data, old_pattern, new_pattern):
         for field_name in data.dtype.names:
             change_needed, new_string = replace_in_strings(data[field_name], old_pattern, new_pattern)
             if change_needed:
+                print('   Pattern found: {}'.format(old_pattern))
                 data[field_name] = new_string
                 change_ever_needed = True
         return change_ever_needed, data
@@ -107,6 +114,7 @@ def replace_in_strings(data, old_pattern, new_pattern):
         #print('Potentially String.')
         new_string = data.replace(old_pattern, new_pattern)
         if new_string != data:
+            print('   Pattern found: {}'.format(old_pattern))
             return True, new_string
         else:
             return False, data
@@ -116,6 +124,7 @@ def replace_in_strings(data, old_pattern, new_pattern):
         #print('Potentially changing bytes string.')
         new_string = data.replace(old_pattern.encode(), new_pattern.encode())
         if new_string != data:
+            print('   Pattern found: {}'.format(old_pattern))
             return True, new_string
         else:
             return False, data
@@ -125,6 +134,7 @@ def replace_in_strings(data, old_pattern, new_pattern):
         #print('Potentially changing numpy string.')
         new_string = data.replace(old_pattern, new_pattern)
         if new_string != data:
+            print('   Pattern found: {}'.format(old_pattern))
             return True, new_string
         else:
             return False, data
@@ -134,6 +144,7 @@ def replace_in_strings(data, old_pattern, new_pattern):
         #print('Potentially changing encoded bytes string.')
         new_string = np.bytes_(data.replace(old_pattern.encode(), new_pattern.encode()))
         if new_string != data:
+            print('   Pattern found: {}'.format(old_pattern))
             return True, new_string
         else:
             return False, data
