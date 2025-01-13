@@ -158,6 +158,35 @@ def replace_in_strings(data, old_pattern, new_pattern):
 def replace_text_in_set_file(input_path_to_set_file, output_path_to_set_file, DCCID, PSCID, GUID):
     """Load a .set file, replace text, and save the modified file."""
     set_data = scipy.io.loadmat(input_path_to_set_file)
+    
+    if 'EEG' in set_data.keys():
+        #This means we have an EEG file (not an ECG file)
+        #with specific fields we will attempt to de-identify
+        try:
+            partial_copy = set_data['EEG'][0][0][39][0][0][5][0][0][0][0][0][1]
+            if int(partial_copy.dtype.str.split('U')[1]) < 10:
+                partial_copy = partial_copy.astype('<U10')
+            partial_copy[0] = 'Anonymized'
+            set_data['EEG'][0][0][39][0][0][5][0][0][0][0][0][1] = partial_copy
+        except:
+            print('   unable to adjust expected Patient ID field for: {}'.format(input_path_to_set_file))
+            
+            
+        try:
+            for i in range(set_data['EEG'][0][0][25][0].shape[0]):
+                temp_type = set_data['EEG'][0][0][25][0][i][7][0]
+                if temp_type == 'CELL':
+                    partial_copy = set_data['EEG'][0][0][25][0][i][3]
+                    if int(partial_copy.dtype.str.split('U')[1]) < 10:
+                        partial_copy = partial_copy.astype('<U10')
+                    partial_copy[0] = 'Anonymized'
+                    set_data['EEG'][0][0][25][0][i][3] = partial_copy
+        except:
+            print('   unable to adjust CELL entries of event struct for: {}'.format(input_path_to_set_file))
+
+        
+        
+    #Also run generic de-id for both EEG/ECG files
     _, set_data = replace_in_strings(set_data, 'sub-{}'.format(DCCID), 'sub-{}'.format(GUID))
     _, set_data = replace_in_strings(set_data, '{}_{}'.format(PSCID, DCCID), GUID)
     _, set_data = replace_in_strings(set_data, PSCID, GUID)
