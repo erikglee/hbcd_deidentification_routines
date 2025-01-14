@@ -159,6 +159,10 @@ def replace_text_in_set_file(input_path_to_set_file, output_path_to_set_file, DC
     """Load a .set file, replace text, and save the modified file."""
     set_data = scipy.io.loadmat(input_path_to_set_file)
     
+    allowed_event_cell_entries = ['PDEV', 'STND', 'REEG', 'objects', 'DVNT',
+                                  'Checkerboard', 'Baseline', 'inverted', 'uprightINV',
+                                  'uprightOBJ', 'Background', 'V03', 'V04', 'V06']
+    
     if 'EEG' in set_data.keys():
         #This means we have an EEG file (not an ECG file)
         #with specific fields we will attempt to de-identify
@@ -179,10 +183,14 @@ def replace_text_in_set_file(input_path_to_set_file, output_path_to_set_file, DC
                     partial_copy = set_data['EEG'][0][0][25][0][i][3]
                     if int(partial_copy.dtype.str.split('U')[1]) < 10:
                         partial_copy = partial_copy.astype('<U10')
-                    partial_copy[0] = 'Anonymized'
-                    set_data['EEG'][0][0][25][0][i][3] = partial_copy
+                    if partial_copy[0] not in allowed_event_cell_entries:
+                        partial_copy[0] = 'Anonymized'
+                        set_data['EEG'][0][0][25][0][i][3] = partial_copy
         except:
             print('   unable to adjust CELL entries of event struct for: {}'.format(input_path_to_set_file))
+            
+    elif 'acq-eeg' in input_path_to_set_file:
+        raise NameError('Error: acq-eeg file found without EEG field at top level of data structure. This file should be skipped until routines to handle this are developed.')
 
         
         
@@ -196,6 +204,8 @@ def replace_text_in_set_file(input_path_to_set_file, output_path_to_set_file, DC
         os.makedirs(parent_folder)
     scipy.io.savemat(output_path_to_set_file, set_data, appendmat = False)
     print(f"Processed {input_path_to_set_file} and saved to {output_path_to_set_file}")
+    
+    return
 
 def main():
     args = my_parser()
